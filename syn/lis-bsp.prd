@@ -1,0 +1,13 @@
+#-- Synplicity, Inc.
+#-- Version 9.0
+#-- Project file C:\User\Berri\Eng\Spartan-3A\LCD\syn\lis-bsp.prd
+#-- Written on Sun Nov 22 11:46:40 2009
+
+#
+### Watch Implementation type ###
+#
+watch_impl -all
+#
+### Watch Implementation properties ###
+#
+watch_prop -clear
