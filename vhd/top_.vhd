@@ -31,8 +31,8 @@
 --    Top level entity used for laboratory designs.
 --
 --------------------------------------------------------------------------------
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity top is
   port (
@@ -44,21 +44,21 @@ entity top is
     lcd_en_o        : out std_logic;
     lcd_rw_o        : out std_logic;
 
-    -- Push Buttons
-    btn_east_i      : in  std_logic;
-    btn_north_i     : in  std_logic;
-    btn_south_i     : in  std_logic;
-    btn_west_i      : in  std_logic;
+--    -- Push Buttons
+--    btn_east_i      : in  std_logic;
+--    btn_north_i     : in  std_logic;
+--    btn_south_i     : in  std_logic;
+--    btn_west_i      : in  std_logic;
 
     -- Rotary Knob (ROT)
-    rot_center_i    : in  std_logic;
+    rot_center_i    : in  std_logic; -- used as reset
     rot_a_i         : in  std_logic;
-    rot_b_i         : in  std_logic;
+    rot_b_i         : in  std_logic
 
-    -- Mechanical Switches
-    switch_i        : in  std_logic_vector(3 downto 0);
+--    -- Mechanical Switches
+--    switch_i        : in  std_logic_vector(3 downto 0);
 
-    -- LEDs
-    led_o           : out std_logic_vector(7 downto 0)
+--    -- LEDs
+--    led_o           : out std_logic_vector(7 downto 0)
   );
 end top;

@@ -44,40 +44,96 @@ architecture struc of top is
 
   signal s_clk       : std_logic;
   signal s_reset     : std_logic;
+  signal s_reset_n   : std_logic;
 
-  signal s_lcd_valid : std_logic;
-  signal s_lcd_data  : std_logic_vector (7 downto 0);
 
-  signal s_lcd_db    : std_logic_vector (7 downto 0);
+  signal s_rot_a_deb : std_logic;
+  signal s_rot_b_deb : std_logic;
+  signal s_rot_knobv : data_t;
+
+  signal s_data_mc   : data_t;
+  signal s_addr_cm   : addr_t;
+
+--  signal s_lcd_en    : std_logic;
+  signal s_lcd_data  : data_t;
+
+  signal s_lcd_db    : std_logic_vector(7 downto 0);
   signal s_lcd_rs    : std_logic;
   signal s_lcd_en    : std_logic;
   signal s_lcd_rw    : std_logic;
 
-  signal s_counter   : unsigned (26 downto 0);
+  signal s_counter   : unsigned(26 downto 0);
 
 begin
 
   s_clk   <= sysclk_i;
-  s_reset <= switch_i(0);
 
-  i_hello_word : lcd_display
-  port map 
-  (
-    clk_i        => s_clk,
-    reset_n_i    => s_reset,
+  i_debounce_reset : debounce
+  port map (
+    clk_in     => s_clk,
+    button_in  => rot_center_i,
+    button_out => s_reset
+  );
 
-    lcd_cs_o     => s_lcd_valid,
-    lcd_data_o   => s_lcd_data
+  s_reset_n <= not(s_reset);
+
+
+  i_debounce_rota : debounce
+  port map (
+    clk_in     => s_clk,
+    button_in  => rot_a_i,
+    button_out => s_rot_a_deb
+  );
+
+
+  i_debounce_rotb : debounce
+  port map (
+    clk_in     => s_clk,
+    button_in  => rot_b_i,
+    button_out => s_rot_b_deb
+  );
+
+
+  i_rot_buf : rot_buf
+  port map (
+    rst_in    => s_reset,
+    clk_in    => s_clk,
+    rot_a_i   => s_rot_a_deb,
+    rot_b_i   => s_rot_b_deb,
+    value_out => s_rot_knobv
+  );
+
+
+  i_tempomat_cpu : tempomat_cpu
+  port map (
+    rst_in          => s_reset,
+    clk_in          => s_clk,
+
+    data_in         => s_data_mc,
+    addr_out        => s_addr_cm,
+
+    wheel_knob_in   => s_rot_knobv,
+    display_out     => s_lcd_data,
+    display_en_out  => s_lcd_en
+  );
+
+
+  i_tempomat_memory : tempomat_memory
+  port map (
+    rst_in          => s_reset,
+    clk_in          => s_clk,
+
+    data_out        => s_data_mc,
+    addr_in         => s_addr_cm
   );
 
 
   i_lcd_core : lcd_core
-  port map
-  (
+  port map (
     clk_i      => s_clk,
-    reset_n_i  => s_reset,
+    reset_n_i  => s_reset_n, -- really inverted?
 
-    lcd_cs_i   => s_lcd_valid,
+    lcd_cs_i   => s_lcd_en,
     lcd_data_i => s_lcd_data,
 
     lcd_data_o => s_lcd_db,
@@ -101,6 +157,6 @@ begin
     end if;
   end process p_debug;
 
-  led_o <= std_logic_vector(s_counter (s_counter'high downto s_counter'high-7));
+--  led_o <= std_logic_vector(s_counter (s_counter'high downto s_counter'high-7));
   
 end struc;

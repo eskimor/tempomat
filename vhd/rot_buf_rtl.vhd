@@ -47,7 +47,7 @@ begin
     if rst_in = '0'
     then
         value := 0;
-        value_out <= (others <= '0');
+        value_out <= (others => '0');
         rot_a_old := rot_a_i;
         rot_b_old := rot_b_i;
 
@@ -60,8 +60,8 @@ begin
         then
             value := value - 1;
         end if;
-        rot_a_old := rot_a_in;
-        rot_b_old := rot_b_in;
+        rot_a_old := rot_a_i;
+        rot_b_old := rot_b_i;
         value_out <= data_t(to_unsigned(value, data_t'length));
     end if;
   end process read_value;

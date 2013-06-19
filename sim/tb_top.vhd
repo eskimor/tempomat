@@ -61,18 +61,10 @@ begin  -- sim
     lcd_en_o     => s_lcd_en,
     lcd_rw_o     => s_lcd_rw,
 
-    btn_east_i   => s_btn_east,
-    btn_north_i  => s_btn_north,
-    btn_south_i  => s_btn_south,
-    btn_west_i   => s_btn_west,
-
     rot_center_i => s_rot_center,
     rot_a_i      => s_rot_a,
-    rot_b_i      => s_rot_b,
+    rot_b_i      => s_rot_b
 
-    switch_i     => s_switch,
-
-    led_o        => s_led
   );
 
   s_lcd_db    <= (others => 'Z');

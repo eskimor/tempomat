@@ -40,11 +40,11 @@ use work.comp_pack.all;
 architecture debounce of debounce is
 begin
     debounce : process(clk_in, button_in) is
-        variable pressed : std_logic :=0;
-        variable waiting : std_logic :=0;
-        variable counter : integer :=0;
-        variable count_to : integer :=0;
-        variable old_value : std_logic :=0;
+        variable pressed : std_logic := '0';
+        variable waiting : std_logic := '0';
+        variable counter : integer := 0;
+        variable count_to : integer := 0;
+        variable old_value : std_logic := '0';
     begin
         if clk_in'event and clk_in = '1'
         then
@@ -72,6 +72,7 @@ begin
                         count_to := 50; -- 1 us
                     end if;
                 end if;
-        end if; 
+            end if;
+        end if;
     end process debounce;
 end debounce;

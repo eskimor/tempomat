@@ -6,14 +6,14 @@ library work;
 use work.comp_pack.all;
 
 -- ROT knob buffer
-entity rot_knob_buffer is
-    port (
-        rst_in : in std_logic;
-        clk_in : in std_logic;
+entity rot_buf is
+  port (
+    rst_in           : in  std_logic;
+    clk_in           : in  std_logic;
 
-        rot_a_i         : in  std_logic;
-        rot_b_i         : in  std_logic;
+    rot_a_i          : in  std_logic;
+    rot_b_i          : in  std_logic;
 
-        value_out   : out std_logic_vector(7 downto 0)
-    );
-end entity tempomat_memory;
+    value_out        : out data_t
+  );
+end entity rot_buf;

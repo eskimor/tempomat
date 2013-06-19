@@ -40,20 +40,20 @@ use work.comp_pack.all;
 architecture impl of tempomat_cpu is
 --    type register_t is natural range 0 to 255; -- moved to comp_pack
 
---    function hex_to_ascii (constant v : in std_logic_vector(3 downto 0) ) return std_logic_vector(7 downto 0) is
---        variable buf : natural range 0 to 15;
---        variable result : natural range 0 to 71;
---    begin
---        buf := v;
---        if buf <= 9
---        then
---            result := buf + 48; -- 48 is 0 in ASCII
---        else
---            buf := buf-10;
---            result := buf + 65; -- 65 is A in ASCII (97 would be a)
---        end if;
---        return std_logic_vector(7 downto 0)(result);
---    end function hex_to_ascii;
+    function hex_to_ascii (constant v : in std_logic_vector ) return data_t is
+        variable buf : natural range 0 to 15;
+        variable result : natural range 0 to 71;
+    begin
+        buf := to_integer( unsigned(v) );
+        if buf <= 9
+        then
+            result := buf + 48; -- 48 is 0 in ASCII
+        else
+            buf := buf-10;
+            result := buf + 65; -- 65 is A in ASCII (97 would be a)
+        end if;
+        return data_t( to_unsigned(result, data_t'length) );
+    end function hex_to_ascii;
 
 begin
 
@@ -63,8 +63,6 @@ begin
         variable ddr_buf : data_t;
 
         variable instr : commands;
---        variable instr : unsigned(4 downto 0);
---        variable instr : unsigned(4 downto 0);
 
         variable accu : natural range 0 to 255;
         variable soll : natural range 0 to 255; -- "Sollwert"
@@ -73,7 +71,7 @@ begin
         variable zero : std_logic;
 
 
-        variable accu_as_data_t : std_logic_vector(7 downto 0);
+        variable accu_as_data_t : data_t;
 
 
         -- Wait related:
@@ -90,7 +88,6 @@ begin
             addr := 0;
             running := '0';
             ddr_buf := (others => '0');
---            ddr_buf := "00000";
 
             addr_out <= (others => '0');
             display_en_out <= '0';
@@ -114,18 +111,17 @@ begin
                         accu := register_t( to_integer( unsigned(wheel_knob_in) ) );
                     when OUTL_C =>
                         accu_as_data_t := data_t( to_unsigned(accu, data_t'length) );
---                        display_out <= hex_to_ascii(accu_as_data_t(3 downto 0)); 
+                        display_out <= hex_to_ascii(accu_as_data_t(3 downto 0)); 
                         display_en_out <= '1';
                     when OUTH_C =>
                         accu_as_data_t := data_t( to_unsigned(accu, data_t'length) );
---                        display_out <= hex_to_ascii(accu_as_data_t(7 downto 4)); 
+                        display_out <= hex_to_ascii(accu_as_data_t(7 downto 4)); 
                         display_en_out <= '1';
                     when OUTCR_C =>
                         display_out <= data_t( to_unsigned(16#0D#, data_t'length) );
                         display_en_out <= '1';
                     when LDI_C =>
                         addr := addr + 1; -- Next byte is no instruction, skip it
---                        accu := natural range 0 to 255 (data_in);
                         accu := register_t( to_integer( unsigned(data_in) ) );
                     when INC_C => accu := accu + 1;
                     when DEC_C => accu := accu -1;
