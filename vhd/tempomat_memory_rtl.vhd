@@ -65,15 +65,12 @@ begin
   mem_cycle: process(clk_in) is
     variable addr : natural range 0 to 20;
   begin
-
     if clk_in'event then
       addr := to_integer ( unsigned(addr_in) );
       case addr is
---            case addr_in is
         when 0 => data_out <= data_t( to_unsigned(commands'pos(LDI_C), data_t'length) );
         when 1 => data_out <= data_t( to_unsigned(0, data_t'length) );
         when 2 => data_out <= data_t( to_unsigned(commands'pos(STR_C), data_t'length) );
-        when 3 => data_out <= data_t( to_unsigned(commands'pos(OUTCR_C), data_t'length) );
         when 3 => data_out <= data_t( to_unsigned(commands'pos(OUTCR_C), data_t'length) );
         when 4 => data_out <= data_t( to_unsigned(commands'pos(OUTH_C), data_t'length) );
         when 5 => data_out <= data_t( to_unsigned(commands'pos(OUTL_C), data_t'length) );
@@ -95,4 +92,4 @@ begin
       end case;
     end if;
   end process mem_cycle;
-end impl;
+end tempomat_commands;
