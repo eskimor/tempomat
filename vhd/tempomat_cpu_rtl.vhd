@@ -38,22 +38,22 @@ library work;
 use work.comp_pack.all;
 
 architecture impl of tempomat_cpu is
-    type register_t is natural range 0 to 255;
+--    type register_t is natural range 0 to 255; -- moved to comp_pack
 
-    function hex_to_ascii (constant v : in std_logic_vector(3 downto 0) ) return std_logic_vector(7 downto 0) is
-        variable buf : natural range 0 to 15;
-        variable result : natural range 0 to 71;
-    begin
-        buf := v;
-        if buf <= 9
-        then
-            result := buf + 48; -- 48 is 0 in ASCII
-        else
-            buf := buf-10;
-            result := buf + 65; -- 65 is A in ASCII (97 would be a)
-        end if;
-        return std_logic_vector(7 downto 0)(result);
-    end function hex_to_ascii;
+--    function hex_to_ascii (constant v : in std_logic_vector(3 downto 0) ) return std_logic_vector(7 downto 0) is
+--        variable buf : natural range 0 to 15;
+--        variable result : natural range 0 to 71;
+--    begin
+--        buf := v;
+--        if buf <= 9
+--        then
+--            result := buf + 48; -- 48 is 0 in ASCII
+--        else
+--            buf := buf-10;
+--            result := buf + 65; -- 65 is A in ASCII (97 would be a)
+--        end if;
+--        return std_logic_vector(7 downto 0)(result);
+--    end function hex_to_ascii;
 
 begin
 
@@ -62,7 +62,8 @@ begin
         variable running : std_logic; -- Whether the "pipeline" is full or not.
         variable ddr_buf : data_t;
 
-        variable instr : commands;
+--        variable instr : commands;
+        variable instr : unsigned(4 downto 0);
 
         variable accu : natural range 0 to 255;
         variable soll : natural range 0 to 255; -- "Sollwert"
@@ -87,41 +88,44 @@ begin
             soll := 0;
             addr := 0;
             running := '0';
-            ddr_buf := (others <= '0');
+            ddr_buf := (others => '0');
+--            ddr_buf := "00000";
 
-            addr_out <= (others <= '0');
+            addr_out <= (others => '0');
             display_en_out <= '0';
 
             carry := '0';
-            zero := '0'
+            zero := '0';
 
             -- Wait related:
             wait_cnt := 0;
             do_wait := '0';
             wait_ms_cnt := 0;
 
-        elsif clk_in'event 
+        elsif clk_in'event
+        then
             if clk_in = '1' and running = '1' and do_wait = '0'
             then
                 display_en_out <= '0'; -- Disable, might be overriden depending on command.
-                instr := commands(ddr_buf);
+                instr := unsigned(ddr_buf);
                 case instr is
-                    when IN_C => 
+                    when unsigned(IN_C) => 
                         accu := register_t(wheel_knob_in);
                     when OUTL_C =>
                         accu_as_data_t := data_t(accu);
-                        display_out <= hex_to_ascii(accu_as_data_t(3 downto 0)); 
+--                        display_out <= hex_to_ascii(accu_as_data_t(3 downto 0)); 
                         display_en_out <= '1';
                     when OUTH_C =>
                         accu_as_data_t := data_t(accu);
-                        display_out <= hex_to_ascii(accu_as_data_t(7 downto 4)); 
+--                        display_out <= hex_to_ascii(accu_as_data_t(7 downto 4)); 
                         display_en_out <= '1';
                     when OUTCR_C =>
                         display_out <= data_t(16#0D#);
                         display_en_out <= '1';
                     when LDI_C =>
                         addr := addr + 1; -- Next byte is no instruction, skip it
-                        accu := natural range 0 to 255 (data_in);
+--                        accu := natural range 0 to 255 (data_in);
+                        accu := unsigned (data_in);
                     when INC_C => accu := accu + 1;
                     when DEC_C => accu := accu -1;
                     when STR_C => soll := accu;
@@ -133,6 +137,7 @@ begin
                         then
                             zero := '1';
                         elsif accu > soll
+                        then
                             carry := '1';
                         end if;
                     when JC_C =>
@@ -147,12 +152,13 @@ begin
                         then
                             addr := addr_t(data_in); -- Or even load new address.
                         end if;
-                    when JMP =>
+                    when JMP_C =>
                         addr := addr_t(data_in); -- Load new address
                     when WAIT_C =>
                         do_wait := '1';
                         addr := addr + 1; -- Drop the wait count
-                        wait_ms_cnt := natural range 0 to 255 (data_in);
+--                        wait_ms_cnt := natural range 0 to 255 (data_in);
+                        wait_ms_cnt := unsigned (data_in);
                 end case;
                 -- DDR memory read next value already on two byte instructions. (We have to execute one instruction per cycle):
                 addr_out <= addr_t(addr);

@@ -35,7 +35,53 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 package comp_pack is
-  
+
+  subtype register_t is natural range 0 to 255;
+
+
+  subtype addr_t is std_logic_vector(4 downto 0);
+  subtype data_t is std_logic_vector(7 downto 0);
+
+  constant CMD_IN    : addr_t := "00001";
+  constant CMD_OUTL  : addr_t := "00010";
+  constant CMD_OUTH  : addr_t := "00011";
+  constant CMD_OUTCR : addr_t := "00100";
+  constant CMD_LDI   : addr_t := "00101";
+  constant CMD_INC   : addr_t := "00110";
+  constant CMD_DEC   : addr_t := "00111";
+  constant CMD_STR   : addr_t := "01000";
+  constant CMD_LDR   : addr_t := "01001";
+  constant CMD_CMP   : addr_t := "01010";
+  constant CMD_JC    : addr_t := "01011";
+  constant CMD_JZ    : addr_t := "01100";
+  constant CMD_JMP   : addr_t := "01101";
+  constant CMD_WAIT  : addr_t := "01110";
+
+
+
+  -- Should go to package (cpu uses it too!):
+  type commands is (
+    IN_C,
+    OUTL_C,
+    OUTH_C,
+    OUTCR_C,
+    LDI_C, -- Load immediate
+    INC_C,
+    DEC_C,
+    STR_C, -- Store register
+    LDR_C, -- Load register
+    CMP_C,
+    JC_C,
+    JZ_C,
+    JMP_C,
+    WAIT_C
+  );
+
+
+
+  -- end common stuff
+
+
   component top is
   port (
     sysclk_i        : in  std_logic;  	-- system clock, 50 MHz
@@ -84,7 +130,7 @@ package comp_pack is
   port (
     clk    : in  std_logic;
     rst_n  : in  std_logic;
-    
+
     wr_en  : in  std_logic;
     din    : in  std_logic_vector (7 downto 0);
 
@@ -106,6 +152,6 @@ package comp_pack is
     lcd_data_o     : out std_logic_vector (7 downto 0)
   );
   end component lcd_display;
-  
-  
+
+
 end comp_pack;

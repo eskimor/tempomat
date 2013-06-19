@@ -63,34 +63,38 @@ use work.comp_pack.all;
 architecture tempomat_commands of tempomat_memory is
 
 begin
-    mem_cycle: process(clk_in) is
-        variable addr : natural range 0 to 20;
-    begin
-        if clk_in'event 
-            addr := natural range 0 to 20(addr_in);
-            case addr is
-                when 0 => data_out <= data_t(LDI_C);
-                when 1 => data_out <= data_t(0);
-                when 2 => data_out <= data_t(STR_C);
-                when 3 => data_out <= data_t(OUTCR_C);
-                when 4 => data_out <= data_t(OUTH_C);
-                when 5 => data_out <= data_t(OUTL_C);
-                when 6 => data_out <= data_t(IN_C);
-                when 7 => data_out <= data_t(CMP_C);
-                when 8 => data_out <= data_t(LDR_C);
-                when 9 => data_out <= data_t(JZ_C);
-                when 10 => data_out <= data_t(17);
-                when 11 => data_out <= data_t(JC_C);
-                when 12 => data_out <= data_t(16);
-                when 13 => data_out <= data_t(DEC_C);
-                when 14 => data_out <= data_t(JMP_C);
-                when 15 => data_out <= data_t(17);
-                when 16 => data_out <= data_t(INC_C);
-                when 17 => data_out <= data_t(WAIT_C);
-                when 18 => data_out <= data_t(200);
-                when 19 => data_out <= data_t(JMP_C);
-                when 20 => data_out <= data_t(2);
-            end case;
-        end if;
-    end process mem_cycle;
+  mem_cycle: process(clk_in) is
+    variable addr : natural range 0 to 20;
+  begin
+
+    if clk_in'event then
+      addr := to_integer ( unsigned(addr_in) );
+      case addr is
+--            case addr_in is
+        when 0 => data_out <= data_t( to_unsigned(commands'pos(LDI_C), data_t'length) );
+        when 1 => data_out <= data_t( to_unsigned(0, data_t'length) );
+--        when 2 => data_out <= data_t(STR_C);
+        when 2 => data_out <= data_t( to_unsigned(commands'pos(STR_C), data_t'length) );
+        when 3 => data_out <= data_t(OUTCR_C);
+        when 3 => data_out <= data_t(OUTCR_C);
+        when 4 => data_out <= data_t(OUTH_C);
+        when 5 => data_out <= data_t(OUTL_C);
+        when 6 => data_out <= data_t(IN_C);
+        when 7 => data_out <= data_t(CMP_C);
+        when 8 => data_out <= data_t(LDR_C);
+        when 9 => data_out <= data_t(JZ_C);
+        when 10 => data_out <= data_t(17);
+        when 11 => data_out <= data_t(JC_C);
+        when 12 => data_out <= data_t(16);
+        when 13 => data_out <= data_t(DEC_C);
+        when 14 => data_out <= data_t(JMP_C);
+        when 15 => data_out <= data_t(17);
+        when 16 => data_out <= data_t(INC_C);
+        when 17 => data_out <= data_t(WAIT_C);
+        when 18 => data_out <= data_t(200);
+        when 19 => data_out <= data_t(JMP_C);
+        when 20 => data_out <= data_t(2);
+      end case;
+    end if;
+  end process mem_cycle;
 end impl;
