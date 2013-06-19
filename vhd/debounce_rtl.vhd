@@ -45,7 +45,6 @@ begin
         variable counter : integer :=0;
         variable count_to : integer :=0;
         variable old_value : std_logic :=0;
-        variable new_value : std_logic :=0;
     begin
         if clk_in'event and clk_in = '1'
         then
@@ -57,25 +56,22 @@ begin
                     waiting := '0';
                 end if;
             else
-            end if;
-        elsif button_in'event and waiting = '0'
-            if pressed = '1'
-            then
-                pressed := '0';
                 waiting := '1';
-                if old_value = button_in -- Check that signal is stable
+                if pressed = '0'
                 then
-                    new_value := old_value; -- Write it out
-                    count_to := 5000000; -- 100 ms block presses for a while.
-                else -- Not yet ready, wait again:
+                    pressed := '1';
+                    old_value := button_in;
                     count_to := 50; -- 1 us
+                else
+                    pressed := '0';
+                    if old_value = button_in -- Check that signal is stable
+                    then
+                        button_out <= button_in; -- Write it out
+                        count_to := 5000000; -- block presses for 100 ms.
+                    else -- Not yet ready, wait again:
+                        count_to := 50; -- 1 us
+                    end if;
                 end if;
-            else
-                old_value := button_in;
-                pressed := '1';
-                waiting := '1';
-                count_to := 50; -- 1 us
-            end if;
         end if; 
     end process debounce;
-end impl;
+end debounce;
