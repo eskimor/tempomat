@@ -59,7 +59,6 @@ use work.comp_pack.all;
 -- 18: 200
 -- 19: JMP
 -- 20: 2
-
 architecture tempomat_commands of tempomat_memory is
 
 begin
@@ -73,27 +72,26 @@ begin
 --            case addr_in is
         when 0 => data_out <= data_t( to_unsigned(commands'pos(LDI_C), data_t'length) );
         when 1 => data_out <= data_t( to_unsigned(0, data_t'length) );
---        when 2 => data_out <= data_t(STR_C);
         when 2 => data_out <= data_t( to_unsigned(commands'pos(STR_C), data_t'length) );
-        when 3 => data_out <= data_t(OUTCR_C);
-        when 3 => data_out <= data_t(OUTCR_C);
-        when 4 => data_out <= data_t(OUTH_C);
-        when 5 => data_out <= data_t(OUTL_C);
-        when 6 => data_out <= data_t(IN_C);
-        when 7 => data_out <= data_t(CMP_C);
-        when 8 => data_out <= data_t(LDR_C);
-        when 9 => data_out <= data_t(JZ_C);
-        when 10 => data_out <= data_t(17);
-        when 11 => data_out <= data_t(JC_C);
-        when 12 => data_out <= data_t(16);
-        when 13 => data_out <= data_t(DEC_C);
-        when 14 => data_out <= data_t(JMP_C);
-        when 15 => data_out <= data_t(17);
-        when 16 => data_out <= data_t(INC_C);
-        when 17 => data_out <= data_t(WAIT_C);
-        when 18 => data_out <= data_t(200);
-        when 19 => data_out <= data_t(JMP_C);
-        when 20 => data_out <= data_t(2);
+        when 3 => data_out <= data_t( to_unsigned(commands'pos(OUTCR_C), data_t'length) );
+        when 3 => data_out <= data_t( to_unsigned(commands'pos(OUTCR_C), data_t'length) );
+        when 4 => data_out <= data_t( to_unsigned(commands'pos(OUTH_C), data_t'length) );
+        when 5 => data_out <= data_t( to_unsigned(commands'pos(OUTL_C), data_t'length) );
+        when 6 => data_out <= data_t( to_unsigned(commands'pos(IN_C), data_t'length) );
+        when 7 => data_out <= data_t( to_unsigned(commands'pos(CMP_C), data_t'length) );
+        when 8 => data_out <= data_t( to_unsigned(commands'pos(LDR_C), data_t'length) );
+        when 9 => data_out <= data_t( to_unsigned(commands'pos(JZ_C), data_t'length) );
+        when 10 => data_out <= data_t( to_unsigned(17, data_t'length));
+        when 11 => data_out <= data_t( to_unsigned(commands'pos(JC_C), data_t'length) );
+        when 12 => data_out <= data_t( to_unsigned(16, data_t'length));
+        when 13 => data_out <= data_t( to_unsigned(commands'pos(DEC_C), data_t'length) );
+        when 14 => data_out <= data_t( to_unsigned(commands'pos(JMP_C), data_t'length) );
+        when 15 => data_out <= data_t( to_unsigned(17, data_t'length));
+        when 16 => data_out <= data_t( to_unsigned(commands'pos(INC_C), data_t'length) );
+        when 17 => data_out <= data_t( to_unsigned(commands'pos(WAIT_C), data_t'length) );
+        when 18 => data_out <= data_t( to_unsigned(200, data_t'length));
+        when 19 => data_out <= data_t( to_unsigned(commands'pos(JMP_C), data_t'length) );
+        when 20 => data_out <= data_t( to_unsigned(2, data_t'length));
       end case;
     end if;
   end process mem_cycle;
