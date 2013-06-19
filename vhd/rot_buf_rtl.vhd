@@ -38,9 +38,6 @@ library work;
 use work.comp_pack.all;
 
 architecture rot_buf of rot_buf is
-    
-    signal rot_right : std_logic;
-    signal rot_left : std_logic;
 begin
   read_value: process(clk_in, rst_in) is
     variable value : natural range 0 to 255;
