@@ -44,8 +44,7 @@ architecture struc of top is
 
   signal s_clk       : std_logic;
   signal s_reset     : std_logic;
-  signal s_reset_n   : std_logic;
-
+--  signal s_reset_n   : std_logic;
 
   signal s_rot_a_deb : std_logic;
   signal s_rot_b_deb : std_logic;
@@ -54,15 +53,13 @@ architecture struc of top is
   signal s_data_mc   : data_t;
   signal s_addr_cm   : addr_t;
 
---  signal s_lcd_en    : std_logic;
+  signal s_lcd_enab  : std_logic;
   signal s_lcd_data  : data_t;
 
   signal s_lcd_db    : std_logic_vector(7 downto 0);
   signal s_lcd_rs    : std_logic;
   signal s_lcd_en    : std_logic;
   signal s_lcd_rw    : std_logic;
-
-  signal s_counter   : unsigned(26 downto 0);
 
 begin
 
@@ -75,7 +72,7 @@ begin
     button_out => s_reset
   );
 
-  s_reset_n <= not(s_reset);
+--  s_reset_n <= not(s_reset);
 
 
   i_debounce_rota : debounce
@@ -114,7 +111,7 @@ begin
 
     wheel_knob_in   => s_rot_knobv,
     display_out     => s_lcd_data,
-    display_en_out  => s_lcd_en
+    display_en_out  => s_lcd_enab
   );
 
 
@@ -131,9 +128,9 @@ begin
   i_lcd_core : lcd_core
   port map (
     clk_i      => s_clk,
-    reset_n_i  => s_reset_n, -- really inverted?
+    reset_n_i  => s_reset,
 
-    lcd_cs_i   => s_lcd_en,
+    lcd_cs_i   => s_lcd_enab,
     lcd_data_i => s_lcd_data,
 
     lcd_data_o => s_lcd_db,
@@ -148,15 +145,15 @@ begin
   lcd_rw_o  <= s_lcd_rw;
 
 
-  p_debug : process (s_clk, s_reset)
-  begin  
-    if (s_reset = '0') then
-      s_counter <= (others => '0');
-    elsif (s_clk'event and s_clk = '1') then
-      s_counter <= s_counter + "1";
-    end if;
-  end process p_debug;
+--  p_debug : process (s_clk, s_reset)
+--  begin  
+--    if (s_reset = '0') then
+--      s_counter <= (others => '0');
+--    elsif (s_clk'event and s_clk = '1') then
+--      s_counter <= s_counter + "1";
+--    end if;
+--  end process p_debug;
 
 --  led_o <= std_logic_vector(s_counter (s_counter'high downto s_counter'high-7));
   
-end struc;
+end architecture struc;
