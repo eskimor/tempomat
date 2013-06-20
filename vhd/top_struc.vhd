@@ -73,7 +73,12 @@ begin
 --  );
 
 --  s_reset_n <= not(s_reset);
-  s_reset <= rot_center_i;
+
+  rstsyn : process (s_clk)
+  begin
+    s_reset <= rot_center_i;
+  end process rstsyn;
+
 
   i_debounce_rota : debounce
   port map (
