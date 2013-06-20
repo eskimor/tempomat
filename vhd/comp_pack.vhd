@@ -61,6 +61,7 @@ package comp_pack is
 
   component debounce is
   port (
+    rst_in           : in  std_logic;
     clk_in           : in  std_logic;
     button_in        : in  std_logic;
     button_out       : out std_logic

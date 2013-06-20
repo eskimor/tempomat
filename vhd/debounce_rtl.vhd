@@ -46,9 +46,10 @@ begin
         variable count_to : integer := 0;
         variable old_value : std_logic := '0';
     begin
-        if clk_in'event and clk_in = '1'
-        then
-            if  waiting = '1'
+        if rst_in = '0' then
+          button_out <= '0';
+        elsif clk_in'event and clk_in = '1' then
+            if waiting = '1'
             then
                 counter := counter + 1;
                 if counter = count_to 

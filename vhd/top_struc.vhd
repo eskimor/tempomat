@@ -65,18 +65,19 @@ begin
 
   s_clk   <= sysclk_i;
 
-  i_debounce_reset : debounce
-  port map (
-    clk_in     => s_clk,
-    button_in  => rot_center_i,
-    button_out => s_reset
-  );
+--  i_debounce_reset : debounce
+--  port map (
+--    clk_in     => s_clk,
+--    button_in  => rot_center_i,
+--    button_out => s_reset
+--  );
 
 --  s_reset_n <= not(s_reset);
-
+  s_reset <= rot_center_i;
 
   i_debounce_rota : debounce
   port map (
+    rst_in     => s_reset,
     clk_in     => s_clk,
     button_in  => rot_a_i,
     button_out => s_rot_a_deb
@@ -85,6 +86,7 @@ begin
 
   i_debounce_rotb : debounce
   port map (
+    rst_in   => s_reset,
     clk_in     => s_clk,
     button_in  => rot_b_i,
     button_out => s_rot_b_deb
