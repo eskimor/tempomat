@@ -44,7 +44,6 @@ architecture struc of top is
 
   signal s_clk       : std_logic;
   signal s_reset     : std_logic;
---  signal s_reset_n   : std_logic;
 
   signal s_rot_a_deb : std_logic;
   signal s_rot_b_deb : std_logic;
@@ -63,7 +62,7 @@ architecture struc of top is
 
 begin
 
-  s_clk   <= sysclk_i;
+  s_clk <= sysclk_i;
 
 --  i_debounce_reset : debounce
 --  port map (
@@ -151,16 +150,4 @@ begin
   lcd_en_o  <= s_lcd_en;
   lcd_rw_o  <= s_lcd_rw;
 
-
---  p_debug : process (s_clk, s_reset)
---  begin  
---    if (s_reset = '0') then
---      s_counter <= (others => '0');
---    elsif (s_clk'event and s_clk = '1') then
---      s_counter <= s_counter + "1";
---    end if;
---  end process p_debug;
-
---  led_o <= std_logic_vector(s_counter (s_counter'high downto s_counter'high-7));
-  
 end architecture struc;

@@ -23,7 +23,7 @@ architecture sim of tb_top is
   signal s_rot_a      : std_logic;
   signal s_rot_b      : std_logic;
 
-begin  -- sim
+begin
 
   i_top : top
   port map (
@@ -130,12 +130,6 @@ begin  -- sim
     wait for 700 us;
     s_rot_a <= '0';
     s_rot_b <= '1';
-
-
-
-
-
-
 
     wait;
   end process test_data_gen;
