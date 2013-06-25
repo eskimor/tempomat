@@ -79,7 +79,7 @@ begin
   end process rstsyn;
 
 
-  i_debounce_rota : debounce
+  i_debounce_rota : debff
   port map (
     rst_in     => s_reset,
     clk_in     => s_clk,
@@ -88,7 +88,7 @@ begin
   );
 
 
-  i_debounce_rotb : debounce
+  i_debounce_rotb : debff
   port map (
     rst_in   => s_reset,
     clk_in     => s_clk,
