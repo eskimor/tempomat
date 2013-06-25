@@ -37,7 +37,6 @@ use ieee.std_logic_1164.all;
 package comp_pack is
 
   subtype register_t is natural range 0 to 255;
-  subtype addr_t is std_logic_vector(4 downto 0);
   subtype data_t is std_logic_vector(7 downto 0);
 
 
@@ -95,25 +94,11 @@ package comp_pack is
     rst_in           : in  std_logic;
     clk_in           : in  std_logic;
 
-    data_in          : in  data_t; -- 8 bits required.
-    addr_out         : out addr_t; -- only 5 bits required for our 20 byte program.
-
     wheel_knob_in    : in  data_t;
     display_out      : out data_t;
     display_en_out   : out std_logic
   );
   end component tempomat_cpu;
-
-
-  component tempomat_memory is
-  port (
-    rst_in           : in  std_logic;
-    clk_in           : in  std_logic;
-
-    data_out         : out data_t; -- 8 bits required.
-    addr_in          : in  addr_t  -- only 5 bits required for our 20 byte program.
-  );
-  end component tempomat_memory;
 
 
   component lcd_core is

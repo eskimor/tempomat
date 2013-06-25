@@ -49,9 +49,6 @@ architecture struc of top is
   signal s_rot_b_deb : std_logic;
   signal s_rot_knobv : data_t;
 
-  signal s_data_mc   : data_t;
-  signal s_addr_cm   : addr_t;
-
   signal s_lcd_enab  : std_logic;
   signal s_lcd_data  : data_t;
 
@@ -112,22 +109,9 @@ begin
     rst_in          => s_reset,
     clk_in          => s_clk,
 
-    data_in         => s_data_mc,
-    addr_out        => s_addr_cm,
-
     wheel_knob_in   => s_rot_knobv,
     display_out     => s_lcd_data,
     display_en_out  => s_lcd_enab
-  );
-
-
-  i_tempomat_memory : tempomat_memory
-  port map (
-    rst_in          => s_reset,
-    clk_in          => s_clk,
-
-    data_out        => s_data_mc,
-    addr_in         => s_addr_cm
   );
 
 

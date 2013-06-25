@@ -55,18 +55,48 @@ architecture impl of tempomat_cpu is
         return data_t( to_unsigned(result, data_t'length) );
     end function hex_to_ascii;
 
+    function readCommandFromMem(constant addr: in natural ) return commands is
+    begin
+      case addr is
+        when 0 => return LDI_C;
+        when 2 => return STR_C;
+        when 3 => return OUTCR_C;
+        when 4 => return OUTH_C;
+        when 5 => return OUTL_C;
+        when 6 => return IN_C;
+        when 7 => return CMP_C;
+        when 8 => return LDR_C;
+        when 9 => return JZ_C;
+        when 11 => return JC_C;
+        when 13 => return DEC_C;
+        when 14 => return JMP_C;
+        when 16 => return INC_C;
+        when 17 => return WAIT_C;
+        when 19 => return JMP_C;
+        when others > assert false report "No command on this address" severity error;
+      end case;
+    end function readCommandFromMem;
+    function readDataFromMem(constant addr: in natural) return natural is
+    begin
+      case addr is
+        when 1 => return 0;
+        when 10 =>  return 17;
+        when 12 =>  return 16;
+        when 15 =>  return 17;
+        when 18 => return 200;
+        when 20 =>  return 2;
+        when others => assert false report "No address on this address!" severity error;
+      end case;
+    end function readDataFromMem;
+
 begin
 
     cpu_cycle: process(rst_in, clk_in) is
         variable addr : natural range 0 to 20;
-        variable running : std_logic; -- Whether the "pipeline" is full or not.
-        variable ddr_buf : data_t;
-
         variable instr : commands;
 
         variable accu : natural range 0 to 255;
         variable soll : natural range 0 to 255; -- "Sollwert"
-        variable cmp_buf : natural range 0 to 255; -- internal register
         variable carry : std_logic;
         variable zero : std_logic;
 
@@ -86,10 +116,7 @@ begin
             accu := 0;
             soll := 0;
             addr := 0;
-            running := '0';
-            ddr_buf := (others => '0');
 
-            addr_out <= (others => '0');
             display_en_out <= '0';
 
             carry := '0';
@@ -100,12 +127,12 @@ begin
             do_wait := '0';
             wait_ms_cnt := 0;
 
-        elsif clk_in'event
+        elsif clk_in'event and clk_in = '1'
         then
-            if clk_in = '1' and running = '1' and do_wait = '0'
+            if  do_wait = '0'
             then
                 display_en_out <= '0'; -- Disable, might be overriden depending on command.
-                instr := commands'val( to_integer( unsigned(ddr_buf) ) );
+                instr := readCommandFromMem(addr);
                 case instr is
                     when IN_C =>
                         accu := register_t( to_integer( unsigned(wheel_knob_in) ) );
@@ -122,7 +149,7 @@ begin
                         display_en_out <= '1';
                     when LDI_C =>
                         addr := addr + 1; -- Next byte is no instruction, skip it
-                        accu := register_t( to_integer( unsigned(data_in) ) );
+                        accu := readDataFromMem(addr);
                     when INC_C => accu := accu + 1;
                     when DEC_C => accu := accu -1;
                     when STR_C => soll := accu;
@@ -141,39 +168,24 @@ begin
                         addr := addr + 1; -- Next byte is no instruction, skip it
                         if carry = '1'
                         then
-                            addr := to_integer ( unsigned(data_in) ); -- Or even load new address.
+                            addr := readDataFromMem(addr); -- Or even load new address.
                         end if;
                     when JZ_C =>
                         addr := addr + 1; -- Next byte is no instruction, skip it
                         if zero = '1'
                         then
-                          addr := to_integer ( unsigned(data_in) ); -- Or even load new address.
+                            addr := readDataFromMem(addr); -- Or even load new address.
                         end if;
                     when JMP_C =>
-                        addr := to_integer ( unsigned(data_in) ); -- Load new address
+                        addr := addr + 1; -- Next byte is no instruction, skip it
+                        addr := readDataFromMem(addr); -- Load new address
                     when WAIT_C =>
                         do_wait := '1';
                         addr := addr + 1; -- Drop the wait count
---                        wait_ms_cnt := natural range 0 to 255 (data_in);
-                        wait_ms_cnt := to_integer( unsigned(data_in) );
+                        wait_ms_cnt := readDataFromMem(addr);
                 end case;
-                -- DDR memory read next value already on two byte instructions. (We have to execute one instruction per cycle):
-                addr_out <= addr_t( to_unsigned(addr, addr_t'length) );
-            elsif clk_in = '0' and do_wait = '0'
-            then
-                if running = '0'
-                then
-                    running := '1';
-                    wait_ms_cnt := 0;
-                    do_wait := '1'; -- Wait for half a cycle 
-                    addr_out <= addr_t( to_unsigned(addr, addr_t'length) ); -- Load first address.
-                else -- Data is ready now
-                    ddr_buf := data_in;
-                    addr := addr + 1;
-                    addr_out <= addr_t( to_unsigned(addr, addr_t'length) );
-                end if;
-            elsif clk_in = '1' and do_wait = '1'
-            then
+                addr := addr + 1;
+            else -- do_wait = 1 :
                 if(wait_ms_cnt > 0)
                 then
                     if wait_cnt = ms_time
@@ -184,7 +196,7 @@ begin
                         wait_cnt := wait_cnt + 1;
                     end if;
                 else
-                    do_wait := '0'; -- Continue with "elsif clk_in = '0' ..."
+                    do_wait := '0'; -- Continue ...
                 end if;
             end if;
         end if;
