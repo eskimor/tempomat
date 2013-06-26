@@ -73,7 +73,9 @@ architecture impl of tempomat_cpu is
         when 16 => return INC_C;
         when 17 => return WAIT_C;
         when 19 => return JMP_C;
-        when others => assert false report "No command on this address "&Natural'image(addr) severity error;
+        when others =>
+          assert false report "No command on this address "&Natural'image(addr) severity failure;
+          return JMP_C;
       end case;
     end function readCommandFromMem;
     function readDataFromMem(constant addr: in natural) return natural is
@@ -85,7 +87,9 @@ architecture impl of tempomat_cpu is
         when 15 =>  return 17;
         when 18 => return 200;
         when 20 =>  return 2;
-        when others => assert false report "No address on this address "&Natural'image(addr) severity error;
+        when others =>
+          assert false report "No address on this address "&Natural'image(addr) severity failure;
+          return 0;
       end case;
     end function readDataFromMem;
 
