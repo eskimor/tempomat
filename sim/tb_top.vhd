@@ -52,84 +52,52 @@ begin
   test_data_gen : process
   begin
     s_rot_center <= '1';
+    s_rot_a <= 'Z';
+    s_rot_b <= 'Z';
+    wait for 5 us;
+    s_rot_center <= '0';
     s_rot_a <= '0';
     s_rot_b <= '0';
-    wait for 500 us;
-    s_rot_center <= '0';
     wait for 1300 us;
     s_rot_center <= '1';
     wait for 700 us;
     s_rot_a <= '0';
     s_rot_b <= '1';
 
-    wait for 500 us;
-    s_rot_a <= '0';
-    s_rot_b <= '0';
-    wait for 700 us;
-    s_rot_a <= '1';
-    s_rot_b <= '0';
-    wait for 500 us;
-    s_rot_a <= '1';
-    s_rot_b <= '1';
-    wait for 700 us;
-    s_rot_a <= '0';
-    s_rot_b <= '1';
 
+    for i in 1 to 5 loop -- count up
+      wait for 500 us;
+      s_rot_a <= '0';
+      s_rot_b <= '0';
+      wait for 700 us;
+      s_rot_a <= '1';
+      s_rot_b <= '0';
+      wait for 500 us;
+      s_rot_a <= '1';
+      s_rot_b <= '1';
+      wait for 700 us;
+      s_rot_a <= '0';
+      s_rot_b <= '1';
+    end loop;
+    wait for 300 us;
+    s_rot_b <= '0';
 
-    wait for 500 us;
-    s_rot_a <= '0';
-    s_rot_b <= '0';
-    wait for 700 us;
-    s_rot_a <= '1';
-    s_rot_b <= '0';
-    wait for 500 us;
-    s_rot_a <= '1';
-    s_rot_b <= '1';
-    wait for 700 us;
-    s_rot_a <= '0';
-    s_rot_b <= '1';
+    wait for 1400 ms;
 
-
-    wait for 500 us;
-    s_rot_a <= '0';
-    s_rot_b <= '0';
-    wait for 700 us;
-    s_rot_a <= '1';
-    s_rot_b <= '0';
-    wait for 500 us;
-    s_rot_a <= '1';
-    s_rot_b <= '1';
-    wait for 700 us;
-    s_rot_a <= '0';
-    s_rot_b <= '1';
-
-
-    wait for 500 us;
-    s_rot_a <= '0';
-    s_rot_b <= '0';
-    wait for 700 us;
-    s_rot_a <= '1';
-    s_rot_b <= '0';
-    wait for 500 us;
-    s_rot_a <= '1';
-    s_rot_b <= '1';
-    wait for 700 us;
-    s_rot_a <= '0';
-    s_rot_b <= '1';
-
-
-    wait for 500 us;
-    s_rot_a <= '0';
-    s_rot_b <= '0';
-    wait for 700 us;
-    s_rot_a <= '1';
-    s_rot_b <= '0';
-    wait for 500 us;
-    s_rot_a <= '1';
-    s_rot_b <= '1';
-    wait for 700 us;
-    s_rot_a <= '0';
-    s_rot_b <= '1';
+    for i in 1 to 7 loop -- count down
+      wait for 500 us;
+      s_rot_a <= '0';
+      s_rot_b <= '0';
+      wait for 700 us;
+      s_rot_a <= '0';
+      s_rot_b <= '1';
+      wait for 500 us;
+      s_rot_a <= '1';
+      s_rot_b <= '1';
+      wait for 700 us;
+      s_rot_a <= '1';
+      s_rot_b <= '0';
+    end loop;
 
     wait;
   end process test_data_gen;

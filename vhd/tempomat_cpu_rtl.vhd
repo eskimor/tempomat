@@ -73,7 +73,7 @@ architecture impl of tempomat_cpu is
         when 16 => return INC_C;
         when 17 => return WAIT_C;
         when 19 => return JMP_C;
-        when others > assert false report "No command on this address" severity error;
+        when others => assert false report "No command on this address "&Natural'image(addr) severity error;
       end case;
     end function readCommandFromMem;
     function readDataFromMem(constant addr: in natural) return natural is
@@ -85,7 +85,7 @@ architecture impl of tempomat_cpu is
         when 15 =>  return 17;
         when 18 => return 200;
         when 20 =>  return 2;
-        when others => assert false report "No address on this address!" severity error;
+        when others => assert false report "No address on this address "&Natural'image(addr) severity error;
       end case;
     end function readDataFromMem;
 
@@ -133,6 +133,7 @@ begin
             then
                 display_en_out <= '0'; -- Disable, might be overriden depending on command.
                 instr := readCommandFromMem(addr);
+                report "addr is "&Natural'image( addr )&", instr is "&Integer'image( integer ( commands'pos( instr ) ) );
                 case instr is
                     when IN_C =>
                         accu := register_t( to_integer( unsigned(wheel_knob_in) ) );
@@ -169,16 +170,19 @@ begin
                         if carry = '1'
                         then
                             addr := readDataFromMem(addr); -- Or even load new address.
+                            addr := addr - 1;
                         end if;
                     when JZ_C =>
                         addr := addr + 1; -- Next byte is no instruction, skip it
                         if zero = '1'
                         then
                             addr := readDataFromMem(addr); -- Or even load new address.
+                            addr := addr - 1;
                         end if;
                     when JMP_C =>
                         addr := addr + 1; -- Next byte is no instruction, skip it
                         addr := readDataFromMem(addr); -- Load new address
+                        addr := addr - 1;
                     when WAIT_C =>
                         do_wait := '1';
                         addr := addr + 1; -- Drop the wait count

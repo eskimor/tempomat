@@ -86,9 +86,10 @@ begin
 
     for i in 29 downto 0 loop
       wait for 70 us;
-      s_rot_b <= '1';
+
       wait until s_rot_out'event;
-      assert ( to_integer(unsigned(s_rot_out)) = i ) report "wrong output: i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+      assert ( to_integer(unsigned(s_rot_out)) = i )
+        report "wrong output: i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
       wait for 50 us;
       s_rot_b <= '0';
     end loop;
@@ -97,7 +98,8 @@ begin
       wait for 70 us;
       s_rot_b <= '1';
       wait until s_rot_out'event;
-      assert ( to_integer(unsigned(s_rot_out)) = 0 ) report "wrong output: should be 0, i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+      assert ( to_integer(unsigned(s_rot_out)) = 0 )
+        report "wrong output: should be 0, i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
       wait for 50 us;
       s_rot_b <= '0';
     end loop;
