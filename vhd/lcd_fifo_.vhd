@@ -15,4 +15,5 @@ entity lcd_fifo is
     full   : out std_logic;
     empty  : out std_logic
   );
+
 end lcd_fifo;

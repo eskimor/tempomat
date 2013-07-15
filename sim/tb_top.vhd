@@ -41,7 +41,7 @@ begin
 
 
   clk_gen: process
-  begin  -- process pci_clk_gen
+  begin
     s_clk <= '0';
     wait for 10 ns;
     s_clk <= '1';
@@ -51,19 +51,20 @@ begin
 
   test_data_gen : process
   begin
+
     s_rot_center <= '1';
     s_rot_a <= 'Z';
     s_rot_b <= 'Z';
     wait for 5 us;
-    s_rot_center <= '0';
     s_rot_a <= '0';
     s_rot_b <= '0';
+    wait for 5 us;
+    s_rot_center <= '0';
     wait for 1300 us;
     s_rot_center <= '1';
     wait for 700 us;
     s_rot_a <= '0';
     s_rot_b <= '1';
-
 
     for i in 1 to 5 loop -- count up
       wait for 500 us;
@@ -100,6 +101,7 @@ begin
     end loop;
 
     wait;
+
   end process test_data_gen;
 
 

@@ -1,11 +1,9 @@
-
 library ieee;
 use ieee.std_logic_1164.all;
 
 library work;
 use work.comp_pack.all;
 
--- ROT knob buffer
 entity rot_buf is
   port (
     rst_in           : in  std_logic;
@@ -16,4 +14,5 @@ entity rot_buf is
 
     value_out        : out data_t
   );
+
 end entity rot_buf;

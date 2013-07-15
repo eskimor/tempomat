@@ -1,38 +1,3 @@
---------------------------------------------------------------------------------
---
---                _     ___ ____        _          _                
---               | |   |_ _/ ___|      | |    __ _| |__   ___  _ __ 
---               | |    | |\___ \ _____| |   / _` | '_ \ / _ \| '__|
---               | |___ | | ___) |_____| |__| (_| | |_) | (_) | |   
---               |_____|___|____/      |_____\__,_|_.__/ \___/|_|   
---
---
---                               LIS - Laborübung
---
---------------------------------------------------------------------------------
---
---                              Copyright (C) 2005-2012
---
---                      ICT - Institute of Computer Technology    
---                    TU Vienna - Technical University of Vienna
---
---------------------------------------------------------------------------------
---
---  NAME:           Top Level Design
---  UNIT:           Top
---  VHDL:           Architecture
---
---  Author:         nachtnebel
---
---------------------------------------------------------------------------------
---
---  Description:
---
---    Top level architecture used for laboratory designs.
---
---    Instantiiert das Design und die LCD Anzeige.
---
---------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -60,15 +25,6 @@ architecture struc of top is
 begin
 
   s_clk <= sysclk_i;
-
---  i_debounce_reset : debounce
---  port map (
---    clk_in     => s_clk,
---    button_in  => rot_center_i,
---    button_out => s_reset
---  );
-
---  s_reset_n <= not(s_reset);
 
   rstsyn : process (s_clk)
   begin

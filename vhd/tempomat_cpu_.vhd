@@ -1,4 +1,3 @@
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -14,4 +13,5 @@ entity tempomat_cpu is
     display_out      : out data_t;
     display_en_out   : out std_logic
   );
+
 end entity tempomat_cpu;

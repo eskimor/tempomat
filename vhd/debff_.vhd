@@ -1,4 +1,3 @@
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -17,4 +16,5 @@ entity debff is
     button_in        : in  std_logic;
     button_out       : out std_logic
   );
+
 end entity debff;
