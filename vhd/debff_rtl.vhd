@@ -14,7 +14,7 @@ architecture rtl of debff is
 
 begin
 
-  counter_set <= flipflops(0) xor flipflops(1);   --determine when to start/reset counter
+  counter_set <= flipflops(0) xor flipflops(1);   -- Start/reset counter on edge.
 
   debounce : process(clk_in) is
   begin
