@@ -10,6 +10,7 @@
 \usepackage{color}
 \usepackage{alltt}
 \usepackage{listings}
+\usepackage{hyperref}
 
 
 
@@ -61,7 +62,7 @@ Labor integrierte Schaltungen\\
 384.088\\}
 \vfill { Labor\"ubung Sommersemester 2005\\}
 \vspace{10mm}{\textbf{Beispiel 7: Tempomat}\\}
-\vspace{10mm}{Betreuer: Herr Nachtnebel}\\
+\vspace{10mm}{Betreuer: Dipl.-Ing. Herr Nachtnebel}\\
 \today\\
 \end{Large}
 \vfill
@@ -86,15 +87,13 @@ Labor integrierte Schaltungen\\
 \section{Aufgabenstellung}
 \label{sec:aufgabe}
 
-%TODO: BLALBA Beschreiben Sie die Aufgabenstellung
-
 The FPGA development board's features, especially the rotary knob and the LCD display, should be used to mimic a speed control system. 
 A micropocessor should be implemented on top of the FPGA, running an assembly program which implements the required speed control application. 
 
 Inputs are the rotary knob sensor readings (2 logic signals) and the rotary knob push button logical signal, which should be used as reset. 
 The outputs are connected to the LCD display and show the current setpoint value of the speed control. 
 
-The speed should not increase/decrease with more than 5km/h/sec to ensure a soft acceleration/deceleration. 
+The speed should not increase/decrease with more than $5 \frac{km}{h}$ per second to ensure a soft acceleration/deceleration. 
 
 The microcontroller should be implemented using a Von-Neumann architecture and should be able to process one assembly instruction per clock cycle. 
 
@@ -121,72 +120,128 @@ See Fig.\ \ref{fig:block}.
 \subsection{Beschreibung der Schaltung}
 \label{sec:schaltung}
 
-TODO: blabla...was tu ma da?
+\subsubsection{debff}
+\label{sec:debff}
 
+This entity is responsible for debouncing a button. It works by means
+of an internal counter which gets reset on any edge of the input
+signal. As long as the level of the input signal stays the same, the
+counter gets incremented. As soon as the MSb is set, the buffered
+input signal is forwarded to the output, synchronously to the global
+clock.
+
+As you can see in figure \ref{fig:block} debff is used for debouncing the rot knob inputs: \texttt{rot\_a\_i} and \texttt{rot\_b\_i}.
+
+\subsubsection{rot\_buf}
+\label{sec:rot_buf}
+
+rot\_buf is responsible for maintaining a buffer which stores the
+desired speed. It takes the debounced \texttt{rot\_a\_i} and
+\texttt{rot\_b\_i} from the corresponding debff components and
+interprets their levels as commands for increasing or decreasing the
+buffer value. Simply a rising edge on \texttt{rot\_a\_i} while
+\texttt{rot\_b\_i} is low triggers a buffer increment, a rising edge on
+\texttt{rot\_b\_i} while \texttt{rot\_a\_i} is low triggers a buffer
+decrement. Both increment and decrement are checked to not overflow,
+meaning they are simply cut off at values 255 and 0 respectively.
+
+\subsubsection{tempomat\_cpu}
+\label{sec:tempomat_cpu}
+The specification demands that one instruction per clock cycle gets
+executed, it is suggested to realize this by means of an asynchronous
+memory. After some consideration of other techniques to achieve this
+requirement, we settled on asynchronous memory and even integrated it
+into the CPU. The memory is simply modeled by means of two functions
+one for reading commands and one for reading data. We decided to use
+two functions to avoid some casts in order to make the code more
+readable. The specification requested a Von Neumann architecture, this
+requirement is not violated because both functions accept the same
+address range. If a proper memory was implemented the functions could
+simply be changed to access the same memory and doing the necessary
+casts.
+
+We did not like this asynchronous pseudo memory at first, so our
+original (very smart) attempt was to implement a proper memory component
+as double-data-rate memory. In the code review we got informed that
+this is in fact not possible, so we considered pipe-lining, but did
+not go for it, because strictly speaking it would not have been
+possible to meet the requirement of a single instruction per clock
+cycle with pipe lining because of jumps, which would flush the pipe
+line resulting in more than one cycle per instruction. We realized
+that the only way of meeting the requirements was to go for the
+suggestion of an asynchronous memory.
+
+The CPU consists of the already mentioned memory access functions and
+a process executing the instructions it finds. The wait instruction is
+executed by means of a busy loop which gets executed instead of the
+instruction decoder. The CPU basically either executes an instruction
+(the \texttt{do\_wait} variable is \texttt{0}) or it waits for a
+specified time after a wait instruction (the \texttt{do\_wait} variable
+is \texttt{1}).
 
 \subsection{Befehlscodierung}
 \label{sec:bef_cod}
 
-% Beschreibung des Befehlssatzes mit der gew\"ahlten Codierung
-
-TODO: evtl allgemeines blabla
-
+We used an enumeration type for the commands, so there was no need
+specify codes manually. But due to the nature of enumeration types
+starting at \texttt{0} it is easily listed:
 
 \noindent\texttt{ 0  =>  IN\_C}
 
-Beschreibung blabla
+Read data from the in port. Data from the rot\_buf component is read into the accumulator.
 
 \noindent\texttt{ 1  =>  OUTL\_C}
 
-Beschreibung blabla
+The lower 4 bits of the accumulator get, converted to the ASCII of the
+corresponding hex-digit first, written to the display output buffer.
 
 \noindent\texttt{ 2  =>  OUTH\_C}
 
-Beschreibung blabla
+The higher 4 bits of the accumulator get, converted to the ASCII of the
+corresponding hex-digit first, written to the display output buffer.
 
 \noindent\texttt{ 3  =>  OUTCR\_C}
 
-Beschreibung blabla
+Output the ASCII code of a carriage return to the display output buffer.
 
 \noindent\texttt{ 4  =>  LDI\_C}
 
-Beschreibung blabla
+Load immediate value. The next byte in memory is read into the accumulator.
 
 \noindent\texttt{ 5  =>  INC\_C}
 
-Beschreibung blabla
+Increments the value of the accumulator.
 
 \noindent\texttt{ 6  =>  DEC\_C}
 
-Beschreibung blabla
+Decrements the value of the accumulator.
 
 \noindent\texttt{ 7  =>  STR\_C}
 
-Beschreibung blabla
-
+Stores the value of the accumulator in the \texttt{soll} register.
 \noindent\texttt{ 8  =>  LDR\_C}
 
-Beschreibung blabla
-
+Load the value of the \texttt{soll} register to the accumulator.
 \noindent\texttt{ 9  =>  CMP\_C}
 
-Beschreibung blabla
+Compare the accumulator with the \texttt{soll} register.
 
 \noindent\texttt{10  =>  JC\_C}
 
-Beschreibung blabla
+Jump to the address found in the next byte in memory if carry bit is set.
 
 \noindent\texttt{11  =>  JZ\_C}
 
-Beschreibung blabla
+Jump to the address found in the next byte in memory if zero bit is set.
 
 \noindent\texttt{12  =>  JMP\_C}
 
-Beschreibung blabla
+Unconditional jump to the address found in the next byte in memory.
 
 \noindent\texttt{13  =>  WAIT\_C}
 
-Beschreibung blabla
+The next byte in memory is interpreted as a time in milliseconds the
+processor has to waist.
 
 
 
