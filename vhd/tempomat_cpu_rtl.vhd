@@ -30,34 +30,35 @@ architecture rtl of tempomat_cpu is
       when 4 => return OUTH_C;
       when 5 => return OUTL_C;
       when 6 => return IN_C;
-        when 7 => return CMP_C;
-        when 8 => return LDR_C;
-        when 9 => return JZ_C;
-        when 11 => return JC_C;
-        when 13 => return DEC_C;
-        when 14 => return JMP_C;
-        when 16 => return INC_C;
-        when 17 => return WAIT_C;
-        when 19 => return JMP_C;
-        when others =>
-          assert false report "No command on this address "&Natural'image(addr) severity failure;
-          return JMP_C;
-      end case;
-    end function readCommandFromMem;
-    function readDataFromMem(constant addr: in natural) return natural is
-    begin
-      case addr is
-        when 1 => return 0;
-        when 10 =>  return 17;
-        when 12 =>  return 16;
-        when 15 =>  return 17;
-        when 18 => return 200;
-        when 20 =>  return 2;
-        when others =>
-          assert false report "No address on this address "&Natural'image(addr) severity failure;
-          return 0;
-      end case;
-    end function readDataFromMem;
+      when 7 => return CMP_C;
+      when 8 => return LDR_C;
+      when 9 => return JZ_C;
+      when 11 => return JC_C;
+      when 13 => return DEC_C;
+      when 14 => return JMP_C;
+      when 16 => return INC_C;
+      when 17 => return WAIT_C;
+      when 19 => return JMP_C;
+      when others =>
+        assert false report "No command on this address "&Natural'image(addr) severity failure;
+        return JMP_C;
+    end case;
+  end function readCommandFromMem;
+
+  function readDataFromMem(constant addr: in natural) return natural is
+  begin
+    case addr is
+      when 1 => return 0;
+      when 10 =>  return 17;
+      when 12 =>  return 16;
+      when 15 =>  return 17;
+      when 18 => return 200;
+      when 20 =>  return 2;
+      when others =>
+        assert false report "No address on this address "&Natural'image(addr) severity failure;
+        return 0;
+    end case;
+  end function readDataFromMem;
 
 begin
 
@@ -94,17 +95,17 @@ begin
       if do_wait = '0' then
         display_en_out <= '0'; -- disable, might be overriden depending on command.
         instr := readCommandFromMem(addr);
-        report "addr is "&Natural'image( addr )&", instr is "&Integer'image( integer ( commands'pos( instr ) ) );
+        --report "addr is "&Natural'image( addr )&", instr is "&Integer'image( integer ( commands'pos( instr ) ) );
         case instr is
           when IN_C =>
             accu := register_t( to_integer( unsigned(wheel_knob_in) ) );
           when OUTL_C =>
             accu_as_data_t := data_t( to_unsigned(accu, data_t'length) );
-            display_out <= hex_to_ascii(accu_as_data_t(3 downto 0)); 
+            display_out <= hex_to_ascii(accu_as_data_t(3 downto 0));
             display_en_out <= '1';
           when OUTH_C =>
             accu_as_data_t := data_t( to_unsigned(accu, data_t'length) );
-            display_out <= hex_to_ascii(accu_as_data_t(7 downto 4)); 
+            display_out <= hex_to_ascii(accu_as_data_t(7 downto 4));
             display_en_out <= '1';
           when OUTCR_C =>
             display_out <= data_t( to_unsigned(16#0D#, data_t'length) );

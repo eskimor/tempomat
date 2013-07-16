@@ -85,7 +85,17 @@ Labor integrierte Schaltungen\\
 
 \section{Aufgabenstellung}
 \label{sec:aufgabe}
+
 TODO: BLALBA Beschreiben Sie die Aufgabenstellung
+The FPGA development board's features, especially the rotary knob and the LCD display, should be used to mimic a speed control system. 
+A micropocessor should be implemented on top of the FPGA, running an assembly program which implements the required speed control application. 
+
+Inputs are the rotary knob sensor readings (2 logic signals) and the rotary knob push button logical signal, which should be used as reset. 
+The outputs are connected to the LCD display and show the current setpoint value of the speed control. 
+
+The speed should not increase/decrease with more than 5km/h/sec to ensure a soft acceleration/deceleration. 
+
+The microcontroller should be implemented using a Von-Neumann architecture and should be able to process one assembly instruction per clock cycle. 
 
 
 \section{Blockschaltbild}
@@ -108,13 +118,15 @@ TODO: BLALBA Beschreiben Sie die Aufgabenstellung
 \subsection{Beschreibung der Schaltung}
 \label{sec:schaltung}
 
+TODO: blabla...was tu ma da?
+
 
 \subsection{Befehlscodierung}
 \label{sec:bef_cod}
 
 % Beschreibung des Befehlssatzes mit der gew\"ahlten Codierung
 
-evtl allgemeines blabla
+TODO: evtl allgemeines blabla
 
 
 \noindent\texttt{ 0  =>  IN\_C}
@@ -180,7 +192,7 @@ Beschreibung blabla
 
 % F"ugen Sie das Assemblerprogramm ein und beschreiben Sie es.
 
-beschreibungs-blabla laalaa
+TODO: beschreibungs-blabla laalaa
 
 
 \begin{alltt}\footnotesize
@@ -214,7 +226,7 @@ beschreibungs-blabla laalaa
 
 % F\"ugen Sie den VHDL Code ein und beschreiben Sie ihn.
 
-vhdl source code blabla lala
+TODO: vhdl source code blabla lala
 
 \subsection{comp\_pack}
 blabla sdfdf
@@ -258,13 +270,35 @@ This modules is the top entity.
 
 The testbench \texttt{tb\_top} module is connected with its inputs to the outputs of the \texttt{top} module and vice-versa, its outputs with the inputs of the \texttt{top} entity. 
 It first initializes the inputs of the \texttt{top} module, thereby testing the reset functionality as well. 
-Then, turning up the knob is simulated in a for-loop, then, turning the knob down is simulated as well -- also, it is tested that the counter stays 0 even if the knob is turned further down. 
+Then, turning the knob up, and then, down again is simulated with two for-loop. 
+Important is that the counter does not overflow when reaching the maximum value of 255 and that it doesn't ``underflow'' at 0.
+
+Because it is not possible to directly access signals inside a module without creating an extra port and because the output of the \texttt{lcd\_core} module is not really (easily) tracable/ well-documented, both the \texttt{debff} debouncer module and the \texttt{rot\_buf} module are tested with their own respective testbench modules, \texttt{tb\_debff} and \texttt{tb\_rot\_buf}. 
 
 
 \lstinputlisting[title={tb\_top.vhd}]{../sim/tb_top.vhd}
 
+\lstinputlisting[title={tb\_debff.vhd}]{../sim/tb_debff.vhd}
+
+\lstinputlisting[title={tb\_rot\_buf.vhd}]{../sim/tb_rot_buf.vhd}
 
 
+\subsubsection{Simulation Results}
+
+The \texttt{tb\_rot\_buf} module uses assertions to ensure the module behaves correctly in the aforementioned circumstances; no assertion errors where triggered running the simulation. 
+
+The \texttt{tb\_debff} module's simulation results are shown in Fig.\ \ref{fig:debff01}; it can be seen that after $600\mathrm{us}$ of a signal being stable, it is passed on to the output. 
+
+The \texttt{tb\_top} module uses similar stimuli as the \texttt{tb\_rot\_buf} module to test the correct behavior of the CPU and execution of the assembly program. 
+
+\begin{figure}[ht]
+	\centering
+%\noindent\makebox[\textwidth]{
+	\includegraphics[keepaspectratio,width=\textwidth]{debff01}
+%}
+	\caption{Simulation Details -- Debouncer Module}
+	\label{fig:debff01}
+\end{figure}
 
 
 \end{document}

@@ -67,11 +67,18 @@ begin
     wait for 1 ns;
     assert ( to_integer(unsigned(s_rot_out)) = 0 ) report "should be 0" severity warning;
 
-    for i in 1 to 30 loop
+    for i in 1 to 260 loop
       wait for 70 us;
       s_rot_a <= '1';
-      wait until s_rot_out'event;
-      assert ( to_integer(unsigned(s_rot_out)) = i ) report "wrong output: i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+--      wait until s_rot_out'event;
+      wait for 20 us;
+      if i > 255 then
+        assert ( to_integer(unsigned(s_rot_out)) = 255 )
+          report "wrong output: i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+      else
+        assert ( to_integer(unsigned(s_rot_out)) = i )
+          report "wrong output: i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+      end if;
       wait for 50 us;
       s_rot_a <= '0';
 --      wait for 1 ns;
@@ -84,26 +91,21 @@ begin
     s_rot_a <= '0';
     s_rot_b <= '0';
 
-    for i in 29 downto 0 loop
-      wait for 70 us;
-
-      wait until s_rot_out'event;
-      assert ( to_integer(unsigned(s_rot_out)) = i )
-        report "wrong output: i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
-      wait for 50 us;
-      s_rot_b <= '0';
-    end loop;
-
-    for i in 1 to 10 loop
+    for i in 270 downto 0 loop
       wait for 70 us;
       s_rot_b <= '1';
-      wait until s_rot_out'event;
-      assert ( to_integer(unsigned(s_rot_out)) = 0 )
-        report "wrong output: should be 0, i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+--    wait until s_rot_out'event;
+      wait for 20 us;
+      if (i-16) > 0 then
+        assert ( to_integer(unsigned(s_rot_out)) = (i-16) )
+          report "wrong output: i-16="&Integer'image(i-16)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+      else
+        assert ( to_integer(unsigned(s_rot_out)) = 0 )
+          report "wrong output: should be 0, i="&Integer'image(i)&" out="&Integer'image(to_integer(unsigned(s_rot_out))) severity warning;
+      end if;
       wait for 50 us;
       s_rot_b <= '0';
     end loop;
-
 
     wait;
   end process test_data_gen;
