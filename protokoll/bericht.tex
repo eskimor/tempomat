@@ -2,7 +2,7 @@
 
 \usepackage[dvips,pdftex]{graphicx}
 \usepackage[latin1]{inputenc}
-\usepackage[ngerman]{babel}
+%\usepackage[ngerman]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[automark]{scrpage2}
 \pagestyle{scrheadings}
@@ -84,10 +84,10 @@ Labor integrierte Schaltungen\\
 \pagebreak
 
 
-\section{Aufgabenstellung}
+\section{Requirements}
 \label{sec:aufgabe}
 
-The FPGA development board's features, especially the rotary knob and the LCD display, should be used to mimic a speed control system. 
+Of the FPGA development board's features, especially the rotary knob and the LCD display, should be used to mimic a speed control system. 
 A micropocessor should be implemented on top of the FPGA, running an assembly program which implements the required speed control application. 
 
 Inputs are the rotary knob sensor readings (2 logic signals) and the rotary knob push button logical signal, which should be used as reset. 
@@ -95,13 +95,15 @@ The outputs are connected to the LCD display and show the current setpoint value
 
 The speed should not increase/decrease with more than $5 \frac{km}{h}$ per second to ensure a soft acceleration/deceleration. 
 
-The microcontroller should be implemented using a Von-Neumann architecture and should be able to process one assembly instruction per clock cycle. 
+The microcontroller should be implemented using a Von Neumann architecture and should be able to process one assembly instruction per clock cycle. 
 
 
-\section{Blockschaltbild}
+\section{Overview}
 \label{sec:block}
 
-See Fig.\ \ref{fig:block}.
+The block diagram can be found in figure \ref{fig:block}. It's
+components are \texttt{debff} debouncers, the \texttt{rot\_buf} for
+caching the requested speed and the \emph{CPU} of course.
 
 % Zeichnen Sie das Blockschaltbild Ihrer Realisierung.
 
@@ -114,13 +116,7 @@ See Fig.\ \ref{fig:block}.
 	\label{fig:block}
 \end{figure}
 
-%\clearpage
-
-
-\subsection{Beschreibung der Schaltung}
-\label{sec:schaltung}
-
-\subsubsection{debff}
+\subsection{debff}
 \label{sec:debff}
 
 This entity is responsible for debouncing a button. It works by means
@@ -132,20 +128,20 @@ clock.
 
 As you can see in figure \ref{fig:block} debff is used for debouncing the rot knob inputs: \texttt{rot\_a\_i} and \texttt{rot\_b\_i}.
 
-\subsubsection{rot\_buf}
+\subsection{rot\_buf}
 \label{sec:rot_buf}
 
 rot\_buf is responsible for maintaining a buffer which stores the
 desired speed. It takes the debounced \texttt{rot\_a\_i} and
 \texttt{rot\_b\_i} from the corresponding debff components and
 interprets their levels as commands for increasing or decreasing the
-buffer value. Simply a rising edge on \texttt{rot\_a\_i} while
+buffer value. A rising edge on \texttt{rot\_a\_i} while
 \texttt{rot\_b\_i} is low triggers a buffer increment, a rising edge on
 \texttt{rot\_b\_i} while \texttt{rot\_a\_i} is low triggers a buffer
 decrement. Both increment and decrement are checked to not overflow,
 meaning they are simply cut off at values 255 and 0 respectively.
 
-\subsubsection{tempomat\_cpu}
+\subsection{tempomat\_cpu}
 \label{sec:tempomat_cpu}
 The specification demands that one instruction per clock cycle gets
 executed, it is suggested to realize this by means of an asynchronous
@@ -179,7 +175,7 @@ instruction decoder. The CPU basically either executes an instruction
 specified time after a wait instruction (the \texttt{do\_wait} variable
 is \texttt{1}).
 
-\subsection{Befehlscodierung}
+\section{Instruction Encoding}
 \label{sec:bef_cod}
 
 We used an enumeration type for the commands, so there was no need
@@ -218,10 +214,12 @@ Decrements the value of the accumulator.
 
 \noindent\texttt{ 7  =>  STR\_C}
 
-Stores the value of the accumulator in the \texttt{soll} register.
+Stores the value of the accumulator to the \texttt{soll} register.
+
 \noindent\texttt{ 8  =>  LDR\_C}
 
 Load the value of the \texttt{soll} register to the accumulator.
+
 \noindent\texttt{ 9  =>  CMP\_C}
 
 Compare the accumulator with the \texttt{soll} register.
@@ -241,41 +239,73 @@ Unconditional jump to the address found in the next byte in memory.
 \noindent\texttt{13  =>  WAIT\_C}
 
 The next byte in memory is interpreted as a time in milliseconds the
-processor has to waist.
+processor has to sleep.
 
 
 
-\section{Assemblerprogramm}
+\section{Assembler Program}
 \label{sec:ass_prog}
 
 % F"ugen Sie das Assemblerprogramm ein und beschreiben Sie es.
 
-TODO: beschreibungs-blabla laalaa
+The assembler program uses each and every machine instruction exactly
+once, which already indicates that the \emph{CPU} was highly optimized
+for the task of the program:
+\linebreak[5]
 
-
-\begin{alltt}\footnotesize
- 0: \textbf{LDI }
- 1: \textit{0}
- 2: \textbf{STR}
- 3: \textbf{OUTCR}
- 4: \textbf{OUTH}
- 5: \textbf{OUTL}
- 6: \textbf{IN}
- 7: \textbf{CMP}
- 8: \textbf{LDR}
- 9: \textbf{JZ }
-10: \textit{17}
-11: \textbf{JC }
-12: \textit{16}
-13: \textbf{DEC}
-14: \textbf{JMP }
-15: \textit{17}
-16: \textbf{INC}
-17: \textbf{WAIT }
-18: \textit{200}
-19: \textbf{JMP }
-20: \textit{2}
-\end{alltt}
+\begin{minipage}[t]{0.85\linewidth}
+  \begin{description}
+  \item[0] It loads \texttt{0} to the accumulator. This is strictly speaking
+    not necessary because the accumulator gets set to zero on reset
+    anyway.
+  \item[2] It stores the current accumulator to the \texttt{soll} register, as
+    you can see from the final jump at \texttt{19} this is the first
+    instruction of the main loop.
+  \item[3] Output a carriage return to the display, such that the previously
+    written text will be overwritten.
+  \item[4, 5] Output low and high byte of the accumulator to the display.
+  \item[6] Now that we wrote the previous value out and stored it to
+    \texttt{soll} we can load the current desired speed via the
+    \texttt{IN} command.
+  \item[7] We compare the accumulator (containing the desired value) with \texttt{soll}.
+  \item[8] We load \texttt{soll} into the accumulator.
+  \item[9] In case the compare was zero we jump directly to the wait
+    instruction, as nothing else needs to be done. In fact we could even
+    jump directly to instruction \texttt{6} if response times would be an
+    issue.
+  \item[11-16] We increment the accumulator in case the carry bit is set,
+    otherwise we decrement it. (We steer in the direction the user
+    requested)
+  \item[17] Due to the requirement of smooth acceleration/deceleration we
+    issue a wait of $200 ms$ before we repeat the loop at instruction 2,
+    where we output the new value and calculate the next one.
+  \end{description}
+\end{minipage}
+\begin{minipage}[t]{0.15\linewidth}
+  \begin{alltt}\footnotesize
+    0: \textbf{LDI }
+    1: \textit{0}
+    2: \textbf{STR}
+    3: \textbf{OUTCR}
+    4: \textbf{OUTH}
+    5: \textbf{OUTL}
+    6: \textbf{IN}
+    7: \textbf{CMP}
+    8: \textbf{LDR}
+    9: \textbf{JZ }
+    10: \textit{17}
+    11: \textbf{JC }
+    12: \textit{16}
+    13: \textbf{DEC}
+    14: \textbf{JMP }
+    15: \textit{17}
+    16: \textbf{INC}
+    17: \textbf{WAIT }
+    18: \textit{200}
+    19: \textbf{JMP }
+    20: \textit{2}
+  \end{alltt} 
+\end{minipage}
 
 
 
@@ -284,10 +314,12 @@ TODO: beschreibungs-blabla laalaa
 
 % F\"ugen Sie den VHDL Code ein und beschreiben Sie ihn.
 
-TODO: vhdl source code blabla lala
+In the following sections you can find the \emph{VHDL} implementation
+of the components already described in section \ref{sec:block}.
 
 \subsection{comp\_pack}
-blabla sdfdf
+Create redundant component declarations for all our entities. In
+addition the enumeration of machine instructions is defined here.
 
 \lstinputlisting[title={comp\_pack.vhd}]{../vhd/comp_pack.vhd}
 
@@ -313,7 +345,7 @@ This modules represents the CPU executing the above described assembly program.
 \lstinputlisting[title={tempomat\_cpu\_rtl.vhd}]{../vhd/tempomat_cpu_rtl.vhd}
 
 \subsection{top}
-This modules is the top entity. 
+This modules is the top entity, integrating everything as shown in section \ref{sec:block} and diagram \ref{fig:block}.
 
 \lstinputlisting[title={top\_.vhd}]{../vhd/top_.vhd}
 
@@ -326,12 +358,21 @@ This modules is the top entity.
 
 % Beschreiben Sie die Testbench und f"ugen Sie das Simulationsresultat ein.
 
-The testbench \texttt{tb\_top} module is connected with its inputs to the outputs of the \texttt{top} module and vice-versa, its outputs with the inputs of the \texttt{top} entity. 
-It first initializes the inputs of the \texttt{top} module, thereby testing the reset functionality as well. 
-Then, turning the knob up, and then, down again is simulated with two for-loop. 
-Important is that the counter does not overflow when reaching the maximum value of 255 and that it doesn't ``underflow'' at 0.
+The testbench \texttt{tb\_top} module is connected with its inputs to
+the outputs of the \texttt{top} module and vice-versa, its outputs
+with the inputs of the \texttt{top} entity.  It first initializes the
+inputs of the \texttt{top} module, thereby testing the reset
+functionality as well.  Then, turning the knob up, and then, down
+again is simulated with two for-loops.  Important is that the counter
+does not overflow when reaching the maximum value of 255 and that it
+doesn't underflow at 0.
 
-Because it is not possible to directly access signals inside a module without creating an extra port and because the output of the \texttt{lcd\_core} module is not really (easily) tracable/ well-documented, both the \texttt{debff} debouncer module and the \texttt{rot\_buf} module are tested with their own respective testbench modules, \texttt{tb\_debff} and \texttt{tb\_rot\_buf}. 
+Because it is not possible to directly access signals inside a module
+without creating an extra port and because the output of the
+\texttt{lcd\_core} module is not really (easily) tracable/
+well-documented, both the \texttt{debff} debouncer module and the
+\texttt{rot\_buf} module are tested with their own respective
+testbench modules, \texttt{tb\_debff} and \texttt{tb\_rot\_buf}.
 
 
 \lstinputlisting[title={tb\_top.vhd}]{../sim/tb_top.vhd}
@@ -343,11 +384,17 @@ Because it is not possible to directly access signals inside a module without cr
 
 \subsubsection{Simulation Results}
 
-The \texttt{tb\_rot\_buf} module uses assertions to ensure the module behaves correctly in the aforementioned circumstances; no assertion errors where triggered running the simulation. 
+The \texttt{tb\_rot\_buf} module uses assertions to ensure the module
+behaves correctly in the aforementioned circumstances; no assertion
+errors where triggered running the simulation.
 
-The \texttt{tb\_debff} module's simulation results are shown in Fig.\ \ref{fig:debff01}; it can be seen that after $600\mathrm{us}$ of a signal being stable, it is passed on to the output. 
+The \texttt{tb\_debff} module's simulation results are shown in Fig.\
+\ref{fig:debff01}; it can be seen that after $600 \mathrm{\mu s}$ of a
+signal being stable, it is passed on to the output.
 
-The \texttt{tb\_top} module uses similar stimuli as the \texttt{tb\_rot\_buf} module to test the correct behavior of the CPU and execution of the assembly program. 
+The \texttt{tb\_top} module uses similar stimuli as the
+\texttt{tb\_rot\_buf} module to test the correct behavior of the CPU
+and execution of the assembly program.
 
 \begin{figure}[ht]
 	\centering
