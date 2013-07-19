@@ -60,7 +60,7 @@
 \sffamily \vspace*{\fill}{Institut f\"ur Computertechnik\\
 Labor integrierte Schaltungen\\
 384.088\\}
-\vfill { Labor\"ubung Sommersemester 2005\\}
+\vfill { Labor\"ubung Sommersemester 2013\\}
 \vspace{10mm}{\textbf{Beispiel 7: Tempomat}\\}
 \vspace{10mm}{Betreuer: Dipl.-Ing. Herr Nachtnebel}\\
 \today\\
@@ -101,9 +101,8 @@ The microcontroller should be implemented using a Von Neumann architecture and s
 \section{Overview}
 \label{sec:block}
 
-The block diagram can be found in figure \ref{fig:block}. It's
-components are \texttt{debff} debouncers, the \texttt{rot\_buf} for
-caching the requested speed and the \emph{CPU} of course.
+The block diagram can be found in Fig.\ \ref{fig:block}. 
+Its components are \texttt{debff} debouncers, the \texttt{rot\_buf} for caching the requested speed value and the \texttt{CPU} of course. 
 
 % Zeichnen Sie das Blockschaltbild Ihrer Realisierung.
 
@@ -112,89 +111,65 @@ caching the requested speed and the \emph{CPU} of course.
 \noindent\makebox[\textwidth]{
 	\includegraphics[keepaspectratio,width=\paperwidth]{diagram01}
 }
-	\caption{Blockschaltbild}
+	\caption{Block Diagram}
 	\label{fig:block}
 \end{figure}
 
 \subsection{debff}
 \label{sec:debff}
 
-This entity is responsible for debouncing a button. It works by means
-of an internal counter which gets reset on any edge of the input
-signal. As long as the level of the input signal stays the same, the
-counter gets incremented. As soon as the MSb is set, the buffered
-input signal is forwarded to the output, synchronously to the global
-clock.
+This entity is responsible for debouncing a button. 
+It works by means of an internal counter which is reset at any edge of the input signal. 
+As long as the level of the input signal stays the same, the counter is incremented. 
+As soon as the MSB is set, the buffered input signal is forwarded to the output, synchronously to the global clock.
 
-As you can see in figure \ref{fig:block} debff is used for debouncing the rot knob inputs: \texttt{rot\_a\_i} and \texttt{rot\_b\_i}.
+As you can see in Fig.\ \ref{fig:block} \texttt{debff} is used for debouncing the rot knob inputs: \texttt{rot\_a\_i} and \texttt{rot\_b\_i}.
 
 \subsection{rot\_buf}
 \label{sec:rot_buf}
 
-rot\_buf is responsible for maintaining a buffer which stores the
-desired speed. It takes the debounced \texttt{rot\_a\_i} and
-\texttt{rot\_b\_i} from the corresponding debff components and
-interprets their levels as commands for increasing or decreasing the
-buffer value. A rising edge on \texttt{rot\_a\_i} while
-\texttt{rot\_b\_i} is low triggers a buffer increment, a rising edge on
-\texttt{rot\_b\_i} while \texttt{rot\_a\_i} is low triggers a buffer
-decrement. Both increment and decrement are checked to not overflow,
-meaning they are simply cut off at values 255 and 0 respectively.
+\texttt{rot\_buf} is responsible for maintaining a buffer which stores the desired speed value. 
+It takes the debounced \texttt{rot\_a\_i} and \texttt{rot\_b\_i} from the corresponding \texttt{debff} components and interprets their levels as commands for increasing or decreasing the buffer value. 
+A rising edge on \texttt{rot\_a\_i} while \texttt{rot\_b\_i} is low triggers a buffer increment; 
+a rising edge on \texttt{rot\_b\_i} while \texttt{rot\_a\_i} is low triggers a buffer decrement. 
+Both incrementing and decrementing the counter value are checked to avoid overflow errors; 
+this is done by simply not incrementing/decrementing the counter at values 255 and 0, respectively. 
 
 \subsection{tempomat\_cpu}
 \label{sec:tempomat_cpu}
-The specification demands that one instruction per clock cycle gets
-executed, it is suggested to realize this by means of an asynchronous
-memory. After some consideration of other techniques to achieve this
-requirement, we settled on asynchronous memory and even integrated it
-into the CPU. The memory is simply modeled by means of two functions
-one for reading commands and one for reading data. We decided to use
-two functions to avoid some casts in order to make the code more
-readable. The specification requested a Von Neumann architecture, this
-requirement is not violated because both functions accept the same
-address range. If a proper memory was implemented the functions could
-simply be changed to access the same memory and doing the necessary
-casts.
+The specification demands that one instruction is executed per clock cycle; 
+it is suggested to realize this by means of an asynchronous memory. 
+After some consideration of other techniques to achieve this requirement, we settled on asynchronous memory and even integrated it into the CPU. 
+The memory is simply modeled by means of two functions: one for reading commands and one for reading data. 
+We decided to use two functions to avoid some casts in order to make the code more readable. 
+The specification requested a Von-Neumann architecture, this requirement is not violated because both functions accept the same address range. 
+If a proper memory was implemented, the functions could simply be changed to access the same memory and doing the necessary casts.
 
-We did not like this asynchronous pseudo memory at first, so our
-original (very smart) attempt was to implement a proper memory component
-as double-data-rate memory. In the code review we got informed that
-this is in fact not possible, so we considered pipe-lining, but did
-not go for it, because strictly speaking it would not have been
-possible to meet the requirement of a single instruction per clock
-cycle with pipe lining because of jumps, which would flush the pipe
-line resulting in more than one cycle per instruction. We realized
-that the only way of meeting the requirements was to go for the
-suggestion of an asynchronous memory.
+We did not like this asynchronous pseudo memory at first, so our original (overly smart) attempt was to implement a proper memory component as double-data-rate memory. 
+At the code review however, we were informed that this is in fact not possible, so we considered pipelining, but did not go for it, because strictly speaking it would not have been possible to meet the requirement of a single instruction per clock cycle with pipelining because jumps would need  flushing the pipeline and thereby using more than one cycle per instruction. 
+We realized that the only way of meeting the requirements was to go for the suggestion of an asynchronous memory. 
 
-The CPU consists of the already mentioned memory access functions and
-a process executing the instructions it finds. The wait instruction is
-executed by means of a busy loop which gets executed instead of the
-instruction decoder. The CPU basically either executes an instruction
-(the \texttt{do\_wait} variable is \texttt{0}) or it waits for a
-specified time after a wait instruction (the \texttt{do\_wait} variable
-is \texttt{1}).
+The CPU consists of the already mentioned memory access functions and a process executing the instructions it finds. 
+The wait instruction is executed by means of a busy loop which is executed instead of the instruction decoder. 
+The CPU basically either executes an instruction (the \texttt{do\_wait} variable is \texttt{0}) or it waits for a specified time after a wait instruction (the \texttt{do\_wait} variable is \texttt{1}). 
 
 \section{Instruction Encoding}
 \label{sec:bef_cod}
 
-We used an enumeration type for the commands, so there was no need
-specify codes manually. But due to the nature of enumeration types
-starting at \texttt{0} it is easily listed:
+We used an enumeration type for the commands, so there was no need specify codes manually. 
+But due to the nature of enumeration types starting at \texttt{0} it is easily listed: 
 
 \noindent\texttt{ 0  =>  IN\_C}
 
-Read data from the in port. Data from the rot\_buf component is read into the accumulator.
+Read data from the in port. Data from the \texttt{rot\_buf} component is read into the accumulator.
 
 \noindent\texttt{ 1  =>  OUTL\_C}
 
-The lower 4 bits of the accumulator get, converted to the ASCII of the
-corresponding hex-digit first, written to the display output buffer.
+The lower 4 bits of the accumulator get, converted to the ASCII of the corresponding hex-digit first, written to the display output buffer.
 
 \noindent\texttt{ 2  =>  OUTH\_C}
 
-The higher 4 bits of the accumulator get, converted to the ASCII of the
-corresponding hex-digit first, written to the display output buffer.
+The higher 4 bits of the accumulator get, converted to the ASCII of the corresponding hex-digit first, written to the display output buffer.
 
 \noindent\texttt{ 3  =>  OUTCR\_C}
 
@@ -238,30 +213,27 @@ Unconditional jump to the address found in the next byte in memory.
 
 \noindent\texttt{13  =>  WAIT\_C}
 
-The next byte in memory is interpreted as a time in milliseconds the
-processor has to sleep.
+The next byte in memory is interpreted as a time (in milliseconds) the processor has to sleep.
 
 
 
-\section{Assembler Program}
+% \section{Assembly Program}
 \label{sec:ass_prog}
 
 % F"ugen Sie das Assemblerprogramm ein und beschreiben Sie es.
 
-The assembler program uses each and every machine instruction exactly
-once, which already indicates that the \emph{CPU} was highly optimized
-for the task of the program:
+The assembly program uses each and every machine instruction exactly once, which already indicates that the \emph{CPU} was highly optimized for the task of the program:
 \linebreak[5]
 
 \begin{minipage}[t]{0.85\linewidth}
   \begin{description}
   \item[0] It loads \texttt{0} to the accumulator. This is strictly speaking
-    not necessary because the accumulator gets set to zero on reset
+    not necessary because the accumulator is set to zero on reset
     anyway.
   \item[2] It stores the current accumulator to the \texttt{soll} register, as
     you can see from the final jump at \texttt{19} this is the first
     instruction of the main loop.
-  \item[3] Output a carriage return to the display, such that the previously
+  \item[3] Output a carriage return to the display, so that the previously
     written text will be overwritten.
   \item[4, 5] Output low and high byte of the accumulator to the display.
   \item[6] Now that we wrote the previous value out and stored it to
@@ -318,8 +290,8 @@ In the following sections you can find the \emph{VHDL} implementation
 of the components already described in section \ref{sec:block}.
 
 \subsection{comp\_pack}
-Create redundant component declarations for all our entities. In
-addition the enumeration of machine instructions is defined here.
+Create redundant component declarations for all our entities. 
+Also, the enumeration of machine instructions is defined here. 
 
 \lstinputlisting[title={comp\_pack.vhd}]{../vhd/comp_pack.vhd}
 
@@ -345,7 +317,7 @@ This modules represents the CPU executing the above described assembly program.
 \lstinputlisting[title={tempomat\_cpu\_rtl.vhd}]{../vhd/tempomat_cpu_rtl.vhd}
 
 \subsection{top}
-This modules is the top entity, integrating everything as shown in section \ref{sec:block} and diagram \ref{fig:block}.
+This modules is the top entity, integrating everything as shown in Fig.\ \ref{fig:block}.
 
 \lstinputlisting[title={top\_.vhd}]{../vhd/top_.vhd}
 
@@ -384,16 +356,13 @@ testbench modules, \texttt{tb\_debff} and \texttt{tb\_rot\_buf}.
 
 \subsubsection{Simulation Results}
 
-The \texttt{tb\_rot\_buf} module uses assertions to ensure the module
-behaves correctly in the aforementioned circumstances; no assertion
-errors where triggered running the simulation.
+The \texttt{tb\_rot\_buf} module uses assertions to ensure the module behaves correctly in the aforementioned circumstances; 
+no assertion errors where triggered running the simulation.
 
-The \texttt{tb\_debff} module's simulation results are shown in Fig.\
-\ref{fig:debff01}; it can be seen that after $600 \mathrm{\mu s}$ of a
-signal being stable, it is passed on to the output.
+The \texttt{tb\_debff} module's simulation results are shown in Fig.\ \ref{fig:debff01}; 
+it can be seen that after $600 \mathrm{\mu s}$ of a signal being stable, it is passed on to the output.
 
-The \texttt{tb\_top} module uses similar stimuli as the
-\texttt{tb\_rot\_buf} module to test the correct behavior of the CPU
+The \texttt{tb\_top} module uses similar stimuli as the \texttt{tb\_rot\_buf} module to test the correct behavior of the CPU
 and execution of the assembly program.
 
 \begin{figure}[ht]
